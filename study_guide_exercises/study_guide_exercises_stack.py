@@ -8,14 +8,11 @@ class StudyGuideExercisesStack(core.Stack):
     def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # The code that defines your stack goes here
+        # The VPC
         vpc = ec2.Vpc(self, 'devassoc',
                       max_azs=1,
                       nat_gateway_provider=ec2.NatProvider.instance(
-                          instance_type=ec2.InstanceType.of(
-                              instance_class=ec2.InstanceClass.BURSTABLE2,
-                              instance_size=ec2.InstanceSize.NANO
-                          ),
+                          instance_type=ec2.InstanceType('t2.nano'),
                           key_name='devassoc'
                       ))
         core.Tags.of(vpc).add('Name', 'devassoc')
@@ -23,6 +20,20 @@ class StudyGuideExercisesStack(core.Stack):
         self.vpc_id = vpc.vpc_id
         self.public_subnet_id = vpc.public_subnets[0].subnet_id
         self.private_subnet_id = vpc.private_subnets[0].subnet_id
+
+        # security group for the NAT
+        nat_security_group = ec2.SecurityGroup(self, 'devassoc-nat-sg',
+                                               vpc=vpc,
+                                               security_group_name='nat-sg',
+                                               description='Allow NAT instance to forward internet traffic')
+        core.Tags.of(nat_security_group).add('Name', 'nat-sg')
+        nat_security_group.add_ingress_rule(
+            ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.tcp(80), 'HTTP from VPC instances')
+        nat_security_group.add_ingress_rule(
+            ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.tcp(443), 'HTTPS from VPC instances')
+        nat_security_group.add_ingress_rule(
+            ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.all_icmp(), 'PING from VPC instances')
+        # chicken and egg problem - can't pass sg to vpn creation
 
         # role for the ec2 instance to assume
         role = iam.Role(self, 'devassoc-webserver',
@@ -45,6 +56,7 @@ class StudyGuideExercisesStack(core.Stack):
         # user data for the ec2 instance
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
+            'yum update',
             'yum install httpd -y',
             'systemctl start httpd',
             'systemctl enable httpd'
