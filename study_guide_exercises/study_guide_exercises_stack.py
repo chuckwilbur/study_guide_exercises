@@ -18,11 +18,13 @@ class StudyGuideExercisesStack(core.Stack):
                           ),
                           key_name='devassoc'
                       ))
+        core.Tags.of(vpc).add('Name', 'devassoc')
 
         self.vpc_id = vpc.vpc_id
         self.public_subnet_id = vpc.public_subnets[0].subnet_id
         self.private_subnet_id = vpc.private_subnets[0].subnet_id
 
         role = iam.Role(self, 'devassoc-webserver', assumed_by=iam.ServicePrincipal('ec2.amazonaws.com'))
+        core.Tags.of(role).add('Name', 'devassoc-webserver')
         role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonPollyReadOnlyAccess'))
         role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('TranslateReadOnly'))
