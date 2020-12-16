@@ -27,5 +27,6 @@ class StudyGuideExercisesStack(core.Stack):
         role = iam.Role(self, 'devassoc-webserver',
                         assumed_by=iam.ServicePrincipal('ec2.amazonaws.com'),
                         role_name='devassoc-webserver')
+        core.Tags.of(role).add('project', 'devassoc')
         role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonPollyReadOnlyAccess'))
         role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('TranslateReadOnly'))
