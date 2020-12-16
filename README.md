@@ -1,7 +1,9 @@
+# study_guide_exercises
+CDK pipeline to build example resources from AWS Certified Developer Study Guide
 
-# Welcome to your CDK Python project!
+## Welcome to your CDK Python project!
 
-This is a blank project for Python development with CDK.
+This is a project for Python development with CDK.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
@@ -47,7 +49,7 @@ To add additional dependencies, for example other CDK libraries, just add
 them to your `setup.py` file and rerun the `pip install -r requirements.txt`
 command.
 
-## Useful commands
+### Useful commands
 
  * `cdk ls`          list all stacks in the app
  * `cdk synth`       emits the synthesized CloudFormation template
