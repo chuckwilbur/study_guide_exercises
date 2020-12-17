@@ -1,3 +1,4 @@
+from os import path
 from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
@@ -62,7 +63,7 @@ class StudyGuideExercisesStack(core.Stack):
             'systemctl enable httpd'
         )
 
-        # the ec2 instance
+        # the public ec2 instance
         instance = ec2.Instance(self, 'webserver-ec2',
                                 instance_name='webserver',
                                 instance_type=ec2.InstanceType('t2.micro'),
@@ -74,4 +75,36 @@ class StudyGuideExercisesStack(core.Stack):
                                 role=role,
                                 user_data=user_data,
                                 security_group=security_group,
+                                key_name='devassoc')
+
+        # open security group for the private instance
+        open_security_group = ec2.SecurityGroup(self, 'devassoc-open-sg',
+                                                vpc=vpc,
+                                                security_group_name='open-http-ssh',
+                                                description='HTTP and SSH from anywhere')
+        open_security_group.add_ingress_rule(
+            ec2.Peer.any_ipv4(), ec2.Port.tcp(22), 'SSH from anywhere')
+        open_security_group.add_ingress_rule(
+            ec2.Peer.any_ipv4(), ec2.Port.tcp(80), 'HTTP from anywhere')
+        open_security_group.add_ingress_rule(
+            ec2.Peer.any_ipv4(), ec2.Port.tcp(443), 'HTTPS from anywhere')
+
+        # user data for the ec2 instance
+        this_dir = path.dirname(__file__)
+        line_list = [line.rstrip('\n') for line in open(path.join(this_dir, 'server-polly.txt'))]
+        private_user_data = ec2.UserData.for_linux()
+        private_user_data.add_commands(*line_list)
+
+        # the private ec2 instance
+        instance = ec2.Instance(self, 'private-ec2',
+                                instance_name='private-instance',
+                                instance_type=ec2.InstanceType('t2.micro'),
+                                machine_image=ec2.MachineImage.generic_linux(
+                                    ami_map={'us-east-2': 'ami-09558250a3419e7d0'}
+                                ),
+                                vpc=vpc,
+                                vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),
+                                role=role,
+                                user_data=private_user_data,
+                                security_group=open_security_group,
                                 key_name='devassoc')
