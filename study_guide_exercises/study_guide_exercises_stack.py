@@ -57,7 +57,7 @@ class StudyGuideExercisesStack(core.Stack):
         # user data for the ec2 instance
         user_data = ec2.UserData.for_linux()
         user_data.add_commands(
-            'yum update',
+            'yum update -y',
             'yum install httpd -y',
             'systemctl start httpd',
             'systemctl enable httpd'
