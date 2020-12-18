@@ -2,6 +2,8 @@ from os import path
 from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
+from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_s3_deployment as s3deploy
 
 
 class StudyGuideExercisesStack(core.Stack):
@@ -91,7 +93,7 @@ class StudyGuideExercisesStack(core.Stack):
 
         # user data for the ec2 instance
         this_dir = path.dirname(__file__)
-        line_list = [line.rstrip('\n') for line in open(path.join(this_dir, 'server-polly.txt'))]
+        line_list = [line.rstrip('\n') for line in open(path.join(this_dir, 'site_files/server-polly.txt'))]
         private_user_data = ec2.UserData.for_linux()
         private_user_data.add_commands(*line_list)
 
@@ -108,3 +110,9 @@ class StudyGuideExercisesStack(core.Stack):
                                 user_data=private_user_data,
                                 security_group=open_security_group,
                                 key_name='devassoc')
+
+        bucket = s3.Bucket(self, 'bucket',
+                           bucket_name='devassoc-storage')
+        s3deploy.BucketDeployment(self, 'DeployFiles',
+                                  destination_bucket=bucket,
+                                  sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])

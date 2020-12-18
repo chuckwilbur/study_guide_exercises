@@ -38,6 +38,7 @@ aws-cdk.aws-route53==1.79.0
 aws-cdk.aws-route53-targets==1.79.0
 aws-cdk.aws-s3==1.79.0
 aws-cdk.aws-s3-assets==1.79.0
+aws-cdk.aws-s3-deployment==1.79.0
 aws-cdk.aws-sam==1.79.0
 aws-cdk.aws-secretsmanager==1.79.0
 aws-cdk.aws-servicecatalog==1.79.0
