@@ -1,6 +1,6 @@
 from aws_cdk import core
 
-from .study_guide_exercises_stack import StudyGuideExercisesStack
+from study_guide_exercises.study_guide_exercises_stack import StudyGuideExercisesStack
 
 
 class WebServerStage(core.Stage):

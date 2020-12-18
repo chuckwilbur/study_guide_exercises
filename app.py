@@ -2,8 +2,7 @@
 
 from aws_cdk import core
 
-from study_guide_exercises.study_guide_exercises_stack import StudyGuideExercisesStack
-from study_guide_exercises.apppipeline_stack import AppPipelineStack
+from app_pipeline.apppipeline_stack import AppPipelineStack
 
 app = core.App()
 AppPipelineStack(app, "AppPipelineStack", env={

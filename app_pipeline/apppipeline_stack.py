@@ -3,7 +3,7 @@ from aws_cdk import aws_codepipeline as cppl
 from aws_cdk import aws_codepipeline_actions as cpplactions
 from aws_cdk import pipelines
 
-from study_guide_exercises.webserver_stage import WebServerStage
+from app_pipeline.webserver_stage import WebServerStage
 
 
 class AppPipelineStack(core.Stack):
