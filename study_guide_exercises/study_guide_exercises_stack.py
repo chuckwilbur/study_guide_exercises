@@ -111,8 +111,8 @@ class StudyGuideExercisesStack(core.Stack):
                                 security_group=open_security_group,
                                 key_name='devassoc')
 
-        bucket = s3.Bucket(self, 'bucket',
-                           bucket_name='devassoc-storage')
-        s3deploy.BucketDeployment(self, 'DeployFiles',
-                                  destination_bucket=bucket,
-                                  sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
+        # bucket = s3.Bucket(self, 'bucket',
+        #                    bucket_name='devassoc-storage')
+        # s3deploy.BucketDeployment(self, 'DeployFiles',
+        #                           destination_bucket=bucket,
+        #                           sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
