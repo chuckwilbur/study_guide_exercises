@@ -11,6 +11,8 @@ class StudyGuideExercisesStack(core.Stack):
     def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        default_vpc = ec2.Vpc.from_lookup(self, 'default-vpc', is_default=True)
+
         # The VPC
         vpc = ec2.Vpc(self, 'devassoc',
                       max_azs=1,
@@ -116,3 +118,11 @@ class StudyGuideExercisesStack(core.Stack):
         # s3deploy.BucketDeployment(self, 'DeployFiles',
         #                           destination_bucket=bucket,
         #                           sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
+
+        # Use the default VPC for the sec group and RDS - RDS requires more than one AZ
+        db_security_group = ec2.SecurityGroup(self, 'devassoc-rds-sg',
+                                              vpc=default_vpc,
+                                              security_group_name='rds-sg-dev-demo',
+                                              description='RDS Security Group for AWS Dev Study Guide')
+        db_security_group.add_ingress_rule(
+            ec2.Peer.ipv4('99.116.136.249/32'), ec2.Port.tcp(3306), 'DB from my IP')
