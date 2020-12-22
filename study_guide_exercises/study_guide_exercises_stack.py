@@ -132,6 +132,9 @@ class StudyGuideExercisesStack(core.Stack):
                                               description='RDS Security Group for AWS Dev Study Guide')
         db_security_group.add_ingress_rule(
             ec2.Peer.ipv4('99.116.136.249/32'), ec2.Port.tcp(3306), 'DB from my IP')
+        db_security_group.add_ingress_rule(
+            ec2.SecurityGroup.from_lookup(self, 'cloud9-sg', 'sg-0fb01f4548d38de83'), ec2.Port.tcp(3306),
+            'DB from Cloud9')
 
         rds_creds_secret = secretsmanager.Secret.from_secret_name(self, 'db-secret', 'rds-maria-db-creds')
         db_version = rds.MariaDbEngineVersion.VER_10_4_13
