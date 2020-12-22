@@ -1,3 +1,5 @@
+import json
+
 from os import path
 from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
@@ -160,3 +162,46 @@ class StudyGuideExercisesStack(core.Stack):
                                    sort_key=user_email,
                                    read_capacity=5,
                                    write_capacity=5)
+
+        encrypt_enforce_bucket = s3.Bucket(self, 'encrypt-enforced-bucket',
+                                           bucket_name='devassoc-encrypted-storage')
+        encrypt_enforce_policy = s3.BucketPolicy(self, 'encrypt-policy',
+                                                 bucket=encrypt_enforce_bucket)
+        deny_incorrect_statement = {
+            "Statement": [
+                {
+                    "Sid": "DenyIncorrectEncryption",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Action": "s3:PutObject",
+                    "Resource": encrypt_enforce_bucket.bucket_arn,
+                    "Condition": {
+                        "StringNotEquals": {
+                            "s3:x-amz-server-side-encryption": "AES256"
+                        }
+                    }
+                }
+            ]
+        }
+        encrypt_enforce_policy.document.add_statements(
+            iam.PolicyStatement.from_json(deny_incorrect_statement)
+        )
+        deny_missing_statement = {
+            "Statement": [
+                {
+                    "Sid": "DenyMissingEncryption",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Action": "s3:PutObject",
+                    "Resource": encrypt_enforce_bucket.bucket_arn,
+                    "Condition": {
+                        "Null": {
+                            "s3:x-amz-server-side-encryption": True
+                        }
+                    }
+                }
+            ]
+        }
+        encrypt_enforce_policy.document.add_statements(
+            iam.PolicyStatement.from_json(deny_missing_statement)
+        )
