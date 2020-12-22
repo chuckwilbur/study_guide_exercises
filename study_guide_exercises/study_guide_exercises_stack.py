@@ -6,6 +6,7 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3deploy
 from aws_cdk import aws_rds as rds
 from aws_cdk import aws_secretsmanager as secretsmanager
+from aws_cdk import aws_dynamodb as dynamodb
 
 
 class StudyGuideExercisesStack(core.Stack):
@@ -27,6 +28,9 @@ class StudyGuideExercisesStack(core.Stack):
         self.vpc_id = vpc.vpc_id
         self.public_subnet_id = vpc.public_subnets[0].subnet_id
         self.private_subnet_id = vpc.private_subnets[0].subnet_id
+        core.CfnOutput(self, 'vpc-id', value=vpc.vpc_id)
+        core.CfnOutput(self, 'public-subnet-id', value=vpc.public_subnets[0].subnet_id)
+        core.CfnOutput(self, 'private-subnet-id', value=vpc.private_subnets[0].subnet_id)
 
         # security group for the NAT
         nat_security_group = ec2.SecurityGroup(self, 'devassoc-nat-sg',
@@ -40,7 +44,7 @@ class StudyGuideExercisesStack(core.Stack):
             ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.tcp(443), 'HTTPS from VPC instances')
         nat_security_group.add_ingress_rule(
             ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.all_icmp(), 'PING from VPC instances')
-        # chicken and egg problem - can't pass sg to vpn creation
+        # chicken and egg problem - can't pass sg to vpc creation
 
         # role for the ec2 instance to assume
         role = iam.Role(self, 'devassoc-webserver',
@@ -144,3 +148,12 @@ class StudyGuideExercisesStack(core.Stack):
 
         core.CfnOutput(self, 'db-endpoint', value=rds_maria_db.db_instance_endpoint_address)
         core.CfnOutput(self, 'db-endpoint-port', value=rds_maria_db.db_instance_endpoint_port)
+
+        user_id = dynamodb.Attribute(name='user_id', type=dynamodb.AttributeType.STRING)
+        user_email = dynamodb.Attribute(name='user_email', type=dynamodb.AttributeType.STRING)
+        dynamo_db = dynamodb.Table(self, 'dynamodb-table',
+                                   table_name='Users',
+                                   partition_key=user_id,
+                                   sort_key=user_email,
+                                   read_capacity=5,
+                                   write_capacity=5)
