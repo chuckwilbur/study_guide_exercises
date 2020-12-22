@@ -154,14 +154,17 @@ class StudyGuideExercisesStack(core.Stack):
         core.CfnOutput(self, 'db-endpoint', value=rds_maria_db.db_instance_endpoint_address)
         core.CfnOutput(self, 'db-endpoint-port', value=rds_maria_db.db_instance_endpoint_port)
 
-        user_id = dynamodb.Attribute(name='user_id', type=dynamodb.AttributeType.STRING)
-        user_email = dynamodb.Attribute(name='user_email', type=dynamodb.AttributeType.STRING)
-        dynamo_db = dynamodb.Table(self, 'dynamodb-table',
-                                   table_name='Users',
-                                   partition_key=user_id,
-                                   sort_key=user_email,
-                                   read_capacity=5,
-                                   write_capacity=5)
+        dynamodb_table_name = 'Users'
+        dynamo_db = dynamodb.Table.from_table_name(self, 'dynamodb-table', dynamodb_table_name)
+        if not dynamo_db:
+            user_id = dynamodb.Attribute(name='user_id', type=dynamodb.AttributeType.STRING)
+            user_email = dynamodb.Attribute(name='user_email', type=dynamodb.AttributeType.STRING)
+            dynamo_db = dynamodb.Table(self, 'dynamodb-table',
+                                       table_name=dynamodb_table_name,
+                                       partition_key=user_id,
+                                       sort_key=user_email,
+                                       read_capacity=5,
+                                       write_capacity=5)
 
         encrypt_enforce_bucket = s3.Bucket(self, 'encrypt-enforced-bucket',
                                            bucket_name='devassoc-encrypted-storage')
