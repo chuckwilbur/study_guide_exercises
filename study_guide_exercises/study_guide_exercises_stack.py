@@ -1,4 +1,5 @@
-import json
+import boto3
+from botocore.client import ClientError
 
 from os import path
 from aws_cdk import core
@@ -121,11 +122,17 @@ class StudyGuideExercisesStack(core.Stack):
                                 security_group=open_security_group,
                                 key_name='devassoc')
 
-        # bucket = s3.Bucket(self, 'bucket',
-        #                    bucket_name='devassoc-storage')
-        # s3deploy.BucketDeployment(self, 'DeployFiles',
-        #                           destination_bucket=bucket,
-        #                           sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
+        bucket_name = 'devassoc-storage'
+        try:
+            boto_s3 = boto3.resource('s3')
+            boto_s3.meta.client.head_bucket(Bucket=bucket_name)
+            core.CfnOutput(self, 'existing-bucket', value=bucket_name)
+        except ClientError:
+            bucket = s3.Bucket(self, 'bucket',
+                               bucket_name=bucket_name)
+            s3deploy.BucketDeployment(self, 'DeployFiles',
+                                      destination_bucket=bucket,
+                                      sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
 
         # Use the default VPC for the sec group and RDS - RDS requires more than one AZ
         db_security_group = ec2.SecurityGroup(self, 'devassoc-rds-sg',
@@ -165,46 +172,54 @@ class StudyGuideExercisesStack(core.Stack):
                                        sort_key=user_email,
                                        read_capacity=5,
                                        write_capacity=5)
+        else:
+            core.CfnOutput(self, 'existing-dynamodb-table', value=dynamo_db.table_arn)
 
-        encrypt_enforce_bucket = s3.Bucket(self, 'encrypt-enforced-bucket',
-                                           bucket_name='devassoc-encrypted-storage')
-        encrypt_enforce_policy = s3.BucketPolicy(self, 'encrypt-policy',
-                                                 bucket=encrypt_enforce_bucket)
-        deny_incorrect_statement = {
-            "Statement": [
-                {
-                    "Sid": "DenyIncorrectEncryption",
-                    "Effect": "Deny",
-                    "Principal": "*",
-                    "Action": "s3:PutObject",
-                    "Resource": encrypt_enforce_bucket.bucket_arn,
-                    "Condition": {
-                        "StringNotEquals": {
-                            "s3:x-amz-server-side-encryption": "AES256"
+        encrypt_enforce_bucket_name = 'devassoc-encrypted-storage'
+        try:
+            boto_s3 = boto3.resource('s3')
+            boto_s3.meta.client.head_bucket(Bucket=encrypt_enforce_bucket_name)
+            core.CfnOutput(self, 'existing-encrypt-bucket', value=encrypt_enforce_bucket_name)
+        except ClientError:
+            encrypt_enforce_bucket = s3.Bucket(self, 'encrypt-enforced-bucket',
+                                               bucket_name=encrypt_enforce_bucket_name)
+            encrypt_enforce_policy = s3.BucketPolicy(self, 'encrypt-policy',
+                                                     bucket=encrypt_enforce_bucket)
+            deny_incorrect_statement = {
+                "Statement": [
+                    {
+                        "Sid": "DenyIncorrectEncryption",
+                        "Effect": "Deny",
+                        "Principal": "*",
+                        "Action": "s3:PutObject",
+                        "Resource": encrypt_enforce_bucket.bucket_arn,
+                        "Condition": {
+                            "StringNotEquals": {
+                                "s3:x-amz-server-side-encryption": "AES256"
+                            }
                         }
                     }
-                }
-            ]
-        }
-        encrypt_enforce_policy.document.add_statements(
-            iam.PolicyStatement.from_json(deny_incorrect_statement)
-        )
-        deny_missing_statement = {
-            "Statement": [
-                {
-                    "Sid": "DenyMissingEncryption",
-                    "Effect": "Deny",
-                    "Principal": "*",
-                    "Action": "s3:PutObject",
-                    "Resource": encrypt_enforce_bucket.bucket_arn,
-                    "Condition": {
-                        "Null": {
-                            "s3:x-amz-server-side-encryption": True
+                ]
+            }
+            encrypt_enforce_policy.document.add_statements(
+                iam.PolicyStatement.from_json(deny_incorrect_statement)
+            )
+            deny_missing_statement = {
+                "Statement": [
+                    {
+                        "Sid": "DenyMissingEncryption",
+                        "Effect": "Deny",
+                        "Principal": "*",
+                        "Action": "s3:PutObject",
+                        "Resource": encrypt_enforce_bucket.bucket_arn,
+                        "Condition": {
+                            "Null": {
+                                "s3:x-amz-server-side-encryption": True
+                            }
                         }
                     }
-                }
-            ]
-        }
-        encrypt_enforce_policy.document.add_statements(
-            iam.PolicyStatement.from_json(deny_missing_statement)
-        )
+                ]
+            }
+            encrypt_enforce_policy.document.add_statements(
+                iam.PolicyStatement.from_json(deny_missing_statement)
+            )
