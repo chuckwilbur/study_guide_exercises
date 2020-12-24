@@ -5,6 +5,7 @@ from os import path
 from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
+from aws_cdk import aws_kms as kms
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3deploy
 from aws_cdk import aws_rds as rds
@@ -213,3 +214,10 @@ class StudyGuideExercisesStack(core.Stack):
             encrypt_enforce_bucket.add_to_resource_policy(
                 iam.PolicyStatement.from_json(deny_missing_statement)
             )
+
+        key = kms.Key(self, 'kms-key',
+                      alias='devassoc-key',
+                      description='Dev Cert Exercise key')
+        admin_role = iam.User.from_user_name(self, 'admin-user', 'DevAdmin')
+        key.grant_admin(admin_role)
+        key.grant_encrypt_decrypt(admin_role)
