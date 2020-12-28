@@ -232,6 +232,20 @@ class StudyGuideExercisesStack(core.Stack):
                                bucket_name=static_site_bucket_name,
                                website_index_document='index.html',
                                website_error_document='error.html')
+            public_read_statement = {
+                "Sid": "PublicReadGetObject",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": [
+                    "s3:GetObject"
+                ],
+                "Resource": [
+                    f"{static_site_bucket.bucket_arn}/*"
+                ]
+            }
+            static_site_bucket.add_to_resource_policy(
+                iam.PolicyStatement.from_json(public_read_statement)
+            )
             s3deploy.BucketDeployment(self, 'DeployStaticSiteFiles',
                                       destination_bucket=static_site_bucket,
                                       sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
