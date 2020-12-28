@@ -189,7 +189,7 @@ class StudyGuideExercisesStack(core.Stack):
                 "Effect": "Deny",
                 "Principal": "*",
                 "Action": "s3:PutObject",
-                "Resource": encrypt_enforce_bucket.bucket_arn,
+                "Resource": f"{encrypt_enforce_bucket.bucket_arn}/*",
                 "Condition": {
                     "StringNotEquals": {
                         "s3:x-amz-server-side-encryption": "AES256"
@@ -204,7 +204,7 @@ class StudyGuideExercisesStack(core.Stack):
                 "Effect": "Deny",
                 "Principal": "*",
                 "Action": "s3:PutObject",
-                "Resource": encrypt_enforce_bucket.bucket_arn,
+                "Resource": f"{encrypt_enforce_bucket.bucket_arn}/*",
                 "Condition": {
                     "Null": {
                         "s3:x-amz-server-side-encryption": True
