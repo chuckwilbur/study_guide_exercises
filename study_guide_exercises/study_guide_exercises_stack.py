@@ -105,7 +105,7 @@ class StudyGuideExercisesStack(core.Stack):
 
         # user data for the ec2 instance
         this_dir = path.dirname(__file__)
-        line_list = [line.rstrip('\n') for line in open(path.join(this_dir, 'site_files/server-polly.txt'))]
+        line_list = [line.rstrip('\n') for line in open(path.join(this_dir, 'polly_file/server-polly.txt'))]
         private_user_data = ec2.UserData.for_linux()
         private_user_data.add_commands(*line_list)
 
@@ -133,7 +133,7 @@ class StudyGuideExercisesStack(core.Stack):
                                bucket_name=bucket_name)
             s3deploy.BucketDeployment(self, 'DeployFiles',
                                       destination_bucket=bucket,
-                                      sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
+                                      sources=[s3deploy.Source.asset('./study_guide_exercises/polly_file')])
 
         # Use the default VPC for the sec group and RDS - RDS requires more than one AZ
         db_security_group = ec2.SecurityGroup(self, 'devassoc-rds-sg',
@@ -221,3 +221,19 @@ class StudyGuideExercisesStack(core.Stack):
         admin_role = iam.User.from_user_name(self, 'admin-user', 'DevAdmin')
         key.grant_admin(admin_role)
         key.grant_encrypt_decrypt(admin_role)
+
+        static_site_bucket_name = 'devassoc-static-site'
+        try:
+            boto_s3 = boto3.resource('s3')
+            boto_s3.meta.client.head_bucket(Bucket=static_site_bucket_name)
+            core.CfnOutput(self, 'existing-static-site-bucket', value=static_site_bucket_name)
+        except ClientError:
+            static_site_bucket = s3.Bucket(self, 'static-site-bucket',
+                               bucket_name=static_site_bucket_name,
+                               website_index_document='index.html',
+                               website_error_document='error.html')
+            s3deploy.BucketDeployment(self, 'DeployStaticSiteFiles',
+                                      destination_bucket=static_site_bucket,
+                                      sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
+            core.CfnOutput(self, 'new-static-site-bucket-url', value=static_site_bucket.bucket_website_url)
+            core.CfnOutput(self, 'new-static-site-bucket', value=static_site_bucket.bucket_name)
