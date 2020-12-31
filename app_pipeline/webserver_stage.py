@@ -1,6 +1,7 @@
 from aws_cdk import core
 
-from study_guide_exercises_stack import StudyGuideExercisesStack
+from web_server_exercises_stack import WebServerExercisesStack
+from s3_exercises_stack import S3ExercisesStack
 from rds_exercise_stack import RDSExerciseStack
 from dynamodb_exercise_stack import DynamodbExerciseStack
 from kms_key_exercise_stack import KMSKeyExerciseStack
@@ -12,11 +13,13 @@ class WebServerStage(core.Stage):
     def __init__(self, scope: core.Construct, id: str, **kwargs):
         super().__init__(scope, id, **kwargs)
 
-        service = StudyGuideExercisesStack(self, 'WebServer', **kwargs)
+        service = WebServerExercisesStack(self, 'WebServer', **kwargs)
 
         self.vpc_id = service.vpc_id
         self.public_subnet_id = service.public_subnet_id
         self.private_subnet_id = service.private_subnet_id
+
+        S3ExercisesStack(self, 'S3Buckets', **kwargs)
 
         RDSExerciseStack(self, 'RDS', **kwargs)
 
