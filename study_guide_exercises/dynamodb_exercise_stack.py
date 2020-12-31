@@ -16,3 +16,6 @@ class DynamodbExerciseStack(core.Stack):
                                    sort_key=user_email,
                                    read_capacity=5,
                                    write_capacity=5)
+
+        core.CfnOutput(self, 'db-table-name', value=dynamo_db.table_name)
+        core.CfnOutput(self, 'db-table-arn', value=dynamo_db.table_arn)

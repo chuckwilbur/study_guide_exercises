@@ -15,3 +15,6 @@ class KMSKeyExerciseStack(core.Stack):
         key.grant_admin(admin_role)
         key.grant_encrypt_decrypt(admin_role)
         self.key_id = key.key_id
+
+        core.CfnOutput(self, 'kms-key-id', value=key.key_id)
+        core.CfnOutput(self, 'kms-key-arn', value=key.key_arn)
