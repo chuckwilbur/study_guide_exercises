@@ -5,20 +5,16 @@ from os import path
 from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
-from aws_cdk import aws_kms as kms
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3deploy
 from aws_cdk import aws_rds as rds
 from aws_cdk import aws_secretsmanager as secretsmanager
-from aws_cdk import aws_dynamodb as dynamodb
 
 
 class StudyGuideExercisesStack(core.Stack):
 
     def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        default_vpc = ec2.Vpc.from_lookup(self, 'default-vpc', is_default=True)
 
         # The VPC
         vpc = ec2.Vpc(self, 'devassoc',
@@ -135,47 +131,6 @@ class StudyGuideExercisesStack(core.Stack):
                                       destination_bucket=bucket,
                                       sources=[s3deploy.Source.asset('./study_guide_exercises/polly_file')])
 
-        # Use the default VPC for the sec group and RDS - RDS requires more than one AZ
-        db_security_group = ec2.SecurityGroup(self, 'devassoc-rds-sg',
-                                              vpc=default_vpc,
-                                              security_group_name='rds-sg-dev-demo',
-                                              description='RDS Security Group for AWS Dev Study Guide')
-        db_security_group.add_ingress_rule(
-            ec2.Peer.ipv4('99.116.136.249/32'), ec2.Port.tcp(3306), 'DB from my IP')
-        db_security_group.add_ingress_rule(
-            ec2.SecurityGroup.from_lookup(self, 'cloud9-sg', 'sg-0fb01f4548d38de83'), ec2.Port.tcp(3306),
-            'DB from Cloud9')
-
-        rds_creds_secret = secretsmanager.Secret.from_secret_name(self, 'db-secret', 'rds-maria-db-creds')
-        db_version = rds.MariaDbEngineVersion.VER_10_4_13
-        rds_maria_db = rds.DatabaseInstance(self, 'devassoc-rds',
-                                            instance_identifier='my-rds-db',
-                                            database_name='mytestdb',
-                                            instance_type=ec2.InstanceType('t2.micro'),
-                                            engine=rds.DatabaseInstanceEngine.maria_db(version=db_version),
-                                            credentials=rds.Credentials.from_secret(rds_creds_secret),
-                                            security_groups=[db_security_group],
-                                            allocated_storage=20,
-                                            vpc=default_vpc,
-                                            vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC))
-
-        core.CfnOutput(self, 'db-endpoint', value=rds_maria_db.db_instance_endpoint_address)
-        core.CfnOutput(self, 'db-endpoint-port', value=rds_maria_db.db_instance_endpoint_port)
-
-        dynamodb_table_name = 'Users'
-        dynamo_db = dynamodb.Table.from_table_name(self, 'dynamodb-table', dynamodb_table_name)
-        if not dynamo_db:
-            user_id = dynamodb.Attribute(name='user_id', type=dynamodb.AttributeType.STRING)
-            user_email = dynamodb.Attribute(name='user_email', type=dynamodb.AttributeType.STRING)
-            dynamo_db = dynamodb.Table(self, 'dynamodb-table',
-                                       table_name=dynamodb_table_name,
-                                       partition_key=user_id,
-                                       sort_key=user_email,
-                                       read_capacity=5,
-                                       write_capacity=5)
-        else:
-            core.CfnOutput(self, 'existing-dynamodb-table', value=dynamo_db.table_arn)
-
         encrypt_enforce_bucket_name = 'devassoc-encrypted-storage'
         try:
             boto_s3 = boto3.resource('s3')
@@ -214,10 +169,3 @@ class StudyGuideExercisesStack(core.Stack):
             encrypt_enforce_bucket.add_to_resource_policy(
                 iam.PolicyStatement.from_json(deny_missing_statement)
             )
-
-        key = kms.Key(self, 'kms-key',
-                      alias='devassoc-key',
-                      description='Dev Cert Exercise key')
-        admin_role = iam.User.from_user_name(self, 'admin-user', 'DevAdmin')
-        key.grant_admin(admin_role)
-        key.grant_encrypt_decrypt(admin_role)
