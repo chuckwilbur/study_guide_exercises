@@ -221,33 +221,3 @@ class StudyGuideExercisesStack(core.Stack):
         admin_role = iam.User.from_user_name(self, 'admin-user', 'DevAdmin')
         key.grant_admin(admin_role)
         key.grant_encrypt_decrypt(admin_role)
-
-        static_site_bucket_name = 'devassoc-static-site'
-        try:
-            boto_s3 = boto3.resource('s3')
-            boto_s3.meta.client.head_bucket(Bucket=static_site_bucket_name)
-            core.CfnOutput(self, 'existing-static-site-bucket', value=static_site_bucket_name)
-        except ClientError:
-            static_site_bucket = s3.Bucket(self, 'static-site-bucket',
-                               bucket_name=static_site_bucket_name,
-                               website_index_document='index.html',
-                               website_error_document='error.html')
-            public_read_statement = {
-                "Sid": "PublicReadGetObject",
-                "Effect": "Allow",
-                "Principal": "*",
-                "Action": [
-                    "s3:GetObject"
-                ],
-                "Resource": [
-                    f"{static_site_bucket.bucket_arn}/*"
-                ]
-            }
-            static_site_bucket.add_to_resource_policy(
-                iam.PolicyStatement.from_json(public_read_statement)
-            )
-            s3deploy.BucketDeployment(self, 'DeployStaticSiteFiles',
-                                      destination_bucket=static_site_bucket,
-                                      sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
-            core.CfnOutput(self, 'new-static-site-bucket-url', value=static_site_bucket.bucket_website_url)
-            core.CfnOutput(self, 'new-static-site-bucket', value=static_site_bucket.bucket_name)
