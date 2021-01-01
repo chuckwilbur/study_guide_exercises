@@ -37,7 +37,6 @@ class WebServerExercisesStack(core.Stack):
             ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.tcp(443), 'HTTPS from VPC instances')
         nat_security_group.add_ingress_rule(
             ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.all_icmp(), 'PING from VPC instances')
-        # chicken and egg problem - can't pass sg to vpc creation
 
         # role for the ec2 instance to assume
         role = iam.Role(self, 'devassoc-webserver',
@@ -67,11 +66,15 @@ class WebServerExercisesStack(core.Stack):
         )
 
         # the public ec2 instance
+        ami_map = {
+            'us-east-1': 'ami-04d29b6f966df1537',
+            'us-east-2': 'ami-09558250a3419e7d0'
+        }
         instance = ec2.Instance(self, 'webserver-ec2',
                                 instance_name='webserver',
                                 instance_type=ec2.InstanceType('t2.micro'),
                                 machine_image=ec2.MachineImage.generic_linux(
-                                    ami_map={'us-east-2': 'ami-09558250a3419e7d0'}
+                                    ami_map=ami_map
                                 ),
                                 vpc=vpc,
                                 vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
@@ -103,7 +106,7 @@ class WebServerExercisesStack(core.Stack):
                                 instance_name='private-instance',
                                 instance_type=ec2.InstanceType('t2.micro'),
                                 machine_image=ec2.MachineImage.generic_linux(
-                                    ami_map={'us-east-2': 'ami-09558250a3419e7d0'}
+                                    ami_map=ami_map
                                 ),
                                 vpc=vpc,
                                 vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE),

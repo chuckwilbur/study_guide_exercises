@@ -6,6 +6,7 @@ from rds_exercise_stack import RDSExerciseStack
 from dynamodb_exercise_stack import DynamodbExerciseStack
 from kms_key_exercise_stack import KMSKeyExerciseStack
 from static_site_exercise_stack import StaticSiteExerciseStack
+from auth_exercises_stack import AuthExercisesStack
 
 
 class WebServerStage(core.Stage):
@@ -31,3 +32,6 @@ class WebServerStage(core.Stage):
 
             static_site = StaticSiteExerciseStack(self, 'S3Site', **kwargs)
             self.bucket_url = static_site.url
+
+        auth_stack = AuthExercisesStack(self, 'Auth', **kwargs)
+        self.auth_vpc_id = auth_stack.vpc_id
