@@ -1,7 +1,3 @@
-import boto3
-from botocore.client import ClientError
-
-from os import path
 from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
