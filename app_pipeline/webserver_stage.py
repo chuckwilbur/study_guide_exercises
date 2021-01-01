@@ -23,10 +23,10 @@ class WebServerStage(core.Stage):
 
         RDSExerciseStack(self, 'RDS', **kwargs)
 
-        DynamodbExerciseStack(self, 'DynamoDB', **kwargs)
+        # DynamodbExerciseStack(self, 'DynamoDB', **kwargs)
 
-        kms_key = KMSKeyExerciseStack(self, 'KMSKey', **kwargs)
-        self.key_id = kms_key.key_id
+        # kms_key = KMSKeyExerciseStack(self, 'KMSKey', **kwargs)
+        # self.key_id = kms_key.key_id
 
         static_site = StaticSiteExerciseStack(self, 'S3Site', **kwargs)
         self.bucket_url = static_site.url
