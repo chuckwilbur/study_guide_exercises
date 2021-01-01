@@ -8,7 +8,7 @@ from app_pipeline.webserver_stage import WebServerStage
 
 class AppPipelineStack(core.Stack):
 
-    def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: core.Construct, construct_id: str, deploy_all: bool, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # The code that defines your stack goes here
@@ -36,7 +36,4 @@ class AppPipelineStack(core.Stack):
                                              synth_command='cdk synth')
                                          )
 
-        pipeline.add_application_stage(WebServerStage(self, 'Pre-Prod', env={
-            'account': '441875730569',
-            'region': 'us-east-2'
-        }))
+        pipeline.add_application_stage(WebServerStage(self, 'Pre-Prod', deploy_all, **kwargs))

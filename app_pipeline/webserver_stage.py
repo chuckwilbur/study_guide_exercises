@@ -10,8 +10,8 @@ from static_site_exercise_stack import StaticSiteExerciseStack
 
 class WebServerStage(core.Stage):
 
-    def __init__(self, scope: core.Construct, id: str, **kwargs):
-        super().__init__(scope, id, **kwargs)
+    def __init__(self, scope: core.Construct, construct_id: str, deploy_all: bool, **kwargs):
+        super().__init__(scope, construct_id, **kwargs)
 
         service = WebServerExercisesStack(self, 'WebServer', **kwargs)
 
@@ -19,14 +19,15 @@ class WebServerStage(core.Stage):
         self.public_subnet_id = service.public_subnet_id
         self.private_subnet_id = service.private_subnet_id
 
-        S3ExercisesStack(self, 'S3Buckets', **kwargs)
-
         RDSExerciseStack(self, 'RDS', **kwargs)
 
-        # DynamodbExerciseStack(self, 'DynamoDB', **kwargs)
+        if deploy_all:
+            S3ExercisesStack(self, 'S3Buckets', **kwargs)
 
-        # kms_key = KMSKeyExerciseStack(self, 'KMSKey', **kwargs)
-        # self.key_id = kms_key.key_id
+            DynamodbExerciseStack(self, 'DynamoDB', **kwargs)
 
-        static_site = StaticSiteExerciseStack(self, 'S3Site', **kwargs)
-        self.bucket_url = static_site.url
+            kms_key = KMSKeyExerciseStack(self, 'KMSKey', **kwargs)
+            self.key_id = kms_key.key_id
+
+            static_site = StaticSiteExerciseStack(self, 'S3Site', **kwargs)
+            self.bucket_url = static_site.url
