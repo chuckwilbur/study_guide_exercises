@@ -7,6 +7,7 @@ from dynamodb_exercise_stack import DynamodbExerciseStack
 from kms_key_exercise_stack import KMSKeyExerciseStack
 from static_site_exercise_stack import StaticSiteExerciseStack
 from auth_exercises_stack import AuthExercisesStack
+from microservice_exercises_stack import MicroserviceExercisesStack
 
 
 class StackSwitches:
@@ -16,7 +17,7 @@ class StackSwitches:
     KMSKeyExerciseStack = 1 << 2
     StaticSiteExerciseStack = 1 << 3
     AuthExercisesStack = 1 << 4
-    NextStack = 1 << 5
+    MicroserviceExercisesStack = 1 << 5
     # 1 << 6
     # 1 << 7
 
@@ -33,6 +34,8 @@ class WebServerStage(core.Stage):
         self.private_subnet_id = service.private_subnet_id
 
         RDSExerciseStack(self, 'RDS', **kwargs)
+
+        MicroserviceExercisesStack(self, 'Microservices', **kwargs)
 
         if deploy_flags & StackSwitches.S3ExercisesStack == StackSwitches.S3ExercisesStack:
             S3ExercisesStack(self, 'S3Buckets', **kwargs)
