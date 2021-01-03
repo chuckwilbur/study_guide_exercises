@@ -9,9 +9,21 @@ from static_site_exercise_stack import StaticSiteExerciseStack
 from auth_exercises_stack import AuthExercisesStack
 
 
+class StackSwitches:
+    NoStack = 0
+    S3ExercisesStack = 1 << 0
+    DynamodbExerciseStack = 1 << 1
+    KMSKeyExerciseStack = 1 << 2
+    StaticSiteExerciseStack = 1 << 3
+    AuthExercisesStack = 1 << 4
+    NextStack = 1 << 5
+    # 1 << 6
+    # 1 << 7
+
+
 class WebServerStage(core.Stage):
 
-    def __init__(self, scope: core.Construct, construct_id: str, deploy_all: bool, **kwargs):
+    def __init__(self, scope: core.Construct, construct_id: str, deploy_flags: int, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         service = WebServerExercisesStack(self, 'WebServer', **kwargs)
@@ -22,16 +34,20 @@ class WebServerStage(core.Stage):
 
         RDSExerciseStack(self, 'RDS', **kwargs)
 
-        if deploy_all:
+        if deploy_flags & StackSwitches.S3ExercisesStack == StackSwitches.S3ExercisesStack:
             S3ExercisesStack(self, 'S3Buckets', **kwargs)
 
+        if deploy_flags & StackSwitches.DynamodbExerciseStack == StackSwitches.DynamodbExerciseStack:
             DynamodbExerciseStack(self, 'DynamoDB', **kwargs)
 
+        if deploy_flags & StackSwitches.KMSKeyExerciseStack == StackSwitches.KMSKeyExerciseStack:
             kms_key = KMSKeyExerciseStack(self, 'KMSKey', **kwargs)
             self.key_id = kms_key.key_id
 
+        if deploy_flags & StackSwitches.StaticSiteExerciseStack == StackSwitches.StaticSiteExerciseStack:
             static_site = StaticSiteExerciseStack(self, 'S3Site', **kwargs)
             self.bucket_url = static_site.url
 
-        auth_stack = AuthExercisesStack(self, 'Auth', **kwargs)
-        self.auth_vpc_id = auth_stack.vpc_id
+        if deploy_flags & StackSwitches.AuthExercisesStack == StackSwitches.AuthExercisesStack:
+            auth_stack = AuthExercisesStack(self, 'Auth', **kwargs)
+            self.auth_vpc_id = auth_stack.vpc_id
