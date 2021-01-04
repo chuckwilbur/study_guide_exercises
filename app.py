@@ -3,10 +3,11 @@
 from aws_cdk import core
 
 from app_pipeline.apppipeline_stack import AppPipelineStack
-from app_pipeline.webserver_stage import StackSwitches
+from app_pipeline.webserver_stage import StackSwitches as ss
 
 app = core.App()
-AppPipelineStack(app, "AppPipelineStack", StackSwitches.NoStack, env={
+deploy_flags = ss.WebServerExercisesStack | ss.RDSExerciseStack | ss.LambdaExercisesStack
+AppPipelineStack(app, "AppPipelineStack", deploy_flags, env={
     'account': '441875730569',
     'region': 'us-east-2'
 })

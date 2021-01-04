@@ -12,14 +12,16 @@ from microservice_exercises_stack import MicroserviceExercisesStack
 
 class StackSwitches:
     NoStack = 0
-    S3ExercisesStack = 1 << 0
-    DynamodbExerciseStack = 1 << 1
-    KMSKeyExerciseStack = 1 << 2
-    StaticSiteExerciseStack = 1 << 3
-    AuthExercisesStack = 1 << 4
-    MicroserviceExercisesStack = 1 << 5
-    # 1 << 6
-    # 1 << 7
+    WebServerExercisesStack = 1 << 0
+    RDSExerciseStack = 1 << 1
+    S3ExercisesStack = 1 << 2
+    DynamodbExerciseStack = 1 << 3
+    KMSKeyExerciseStack = 1 << 4
+    StaticSiteExerciseStack = 1 << 5
+    AuthExercisesStack = 1 << 6
+    MicroserviceExercisesStack = 1 << 7
+    LambdaExercisesStack = 1 << 8
+    # 1 << 9
 
 
 class WebServerStage(core.Stage):
@@ -27,15 +29,15 @@ class WebServerStage(core.Stage):
     def __init__(self, scope: core.Construct, construct_id: str, deploy_flags: int, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
-        service = WebServerExercisesStack(self, 'WebServer', **kwargs)
+        if deploy_flags & StackSwitches.WebServerExercisesStack == StackSwitches.WebServerExercisesStack:
+            service = WebServerExercisesStack(self, 'WebServer', **kwargs)
 
-        self.vpc_id = service.vpc_id
-        self.public_subnet_id = service.public_subnet_id
-        self.private_subnet_id = service.private_subnet_id
+            self.vpc_id = service.vpc_id
+            self.public_subnet_id = service.public_subnet_id
+            self.private_subnet_id = service.private_subnet_id
 
-        RDSExerciseStack(self, 'RDS', **kwargs)
-
-        MicroserviceExercisesStack(self, 'Microservices', **kwargs)
+        if deploy_flags & StackSwitches.RDSExerciseStack == StackSwitches.RDSExerciseStack:
+            RDSExerciseStack(self, 'RDS', **kwargs)
 
         if deploy_flags & StackSwitches.S3ExercisesStack == StackSwitches.S3ExercisesStack:
             S3ExercisesStack(self, 'S3Buckets', **kwargs)
@@ -54,3 +56,6 @@ class WebServerStage(core.Stage):
         if deploy_flags & StackSwitches.AuthExercisesStack == StackSwitches.AuthExercisesStack:
             auth_stack = AuthExercisesStack(self, 'Auth', **kwargs)
             self.auth_vpc_id = auth_stack.vpc_id
+
+        if deploy_flags & StackSwitches.MicroserviceExercisesStack == StackSwitches.MicroserviceExercisesStack:
+            MicroserviceExercisesStack(self, 'Microservices', **kwargs)
