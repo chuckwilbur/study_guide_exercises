@@ -11,7 +11,9 @@ class S3ExercisesStack(core.Stack):
 
         bucket_name = 'devassoc-storage'
         bucket = s3.Bucket(self, 'bucket',
-                           bucket_name=bucket_name)
+                           bucket_name=bucket_name,
+                           removal_policy=core.RemovalPolicy.DESTROY,
+                           auto_delete_objects=True)
         s3deploy.BucketDeployment(self, 'DeployFiles',
                                   destination_bucket=bucket,
                                   sources=[s3deploy.Source.asset('./study_guide_exercises/polly_file')])
@@ -20,7 +22,9 @@ class S3ExercisesStack(core.Stack):
 
         encrypt_enforce_bucket_name = 'devassoc-encrypted-storage'
         encrypt_enforce_bucket = s3.Bucket(self, 'encrypt-enforced-bucket',
-                                           bucket_name=encrypt_enforce_bucket_name)
+                                           bucket_name=encrypt_enforce_bucket_name,
+                                           removal_policy=core.RemovalPolicy.DESTROY,
+                                           auto_delete_objects=True)
         deny_incorrect_statement = {
             "Sid": "DenyIncorrectEncryption",
             "Effect": "Deny",

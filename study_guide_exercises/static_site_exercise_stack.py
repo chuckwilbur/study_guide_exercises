@@ -11,9 +11,11 @@ class StaticSiteExerciseStack(core.Stack):
 
         static_site_bucket_name = 'devassoc-static-site'
         static_site_bucket = s3.Bucket(self, 'static-site-bucket',
-                           bucket_name=static_site_bucket_name,
-                           website_index_document='index.html',
-                           website_error_document='error.html')
+                                       bucket_name=static_site_bucket_name,
+                                       website_index_document='index.html',
+                                       website_error_document='error.html',
+                                       removal_policy=core.RemovalPolicy.DESTROY,
+                                       auto_delete_objects=True)
         public_read_statement = {
             "Sid": "PublicReadGetObject",
             "Effect": "Allow",

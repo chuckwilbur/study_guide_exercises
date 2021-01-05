@@ -15,13 +15,17 @@ class LambdaExercisesStack(core.Stack):
         shoe_company_ingestion_bucket_name = 'devassoc-shoe-company-ingestion'
         shoe_company_ingestion_bucket = s3.Bucket(self, 'shoe-company-ingestion-bucket',
                                                   bucket_name=shoe_company_ingestion_bucket_name,
-                                                  access_control=s3.BucketAccessControl.PRIVATE)
+                                                  access_control=s3.BucketAccessControl.PRIVATE,
+                                                  removal_policy=core.RemovalPolicy.DESTROY,
+                                                  auto_delete_objects=True)
         core.CfnOutput(self, 'new-ingestion-bucket', value=shoe_company_ingestion_bucket.bucket_name)
 
         shoe_company_json_bucket_name = 'devassoc-shoe-company-json'
         shoe_company_json_bucket = s3.Bucket(self, 'shoe-company-json-bucket',
                                              bucket_name=shoe_company_json_bucket_name,
-                                             access_control=s3.BucketAccessControl.PRIVATE)
+                                             access_control=s3.BucketAccessControl.PRIVATE,
+                                             removal_policy=core.RemovalPolicy.DESTROY,
+                                             auto_delete_objects=True)
         core.CfnOutput(self, 'new-json-bucket', value=shoe_company_json_bucket.bucket_name)
 
         lambda_role = iam.Role(self, 'lambda-role',
