@@ -8,6 +8,7 @@ from kms_key_exercise_stack import KMSKeyExerciseStack
 from static_site_exercise_stack import StaticSiteExerciseStack
 from auth_exercises_stack import AuthExercisesStack
 from microservice_exercises_stack import MicroserviceExercisesStack
+from lambda_exercises_stack import LambdaExercisesStack
 
 
 class StackSwitches:
@@ -59,3 +60,6 @@ class WebServerStage(core.Stage):
 
         if deploy_flags & StackSwitches.MicroserviceExercisesStack == StackSwitches.MicroserviceExercisesStack:
             MicroserviceExercisesStack(self, 'Microservices', **kwargs)
+
+        if deploy_flags & StackSwitches.LambdaExercisesStack == StackSwitches.LambdaExercisesStack:
+            LambdaExercisesStack(self, 'Lambda', **kwargs)
