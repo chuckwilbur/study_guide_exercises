@@ -6,7 +6,7 @@ from app_pipeline.apppipeline_stack import AppPipelineStack
 from app_pipeline.webserver_stage import StackSwitches as ss
 
 app = core.App()
-deploy_flags = ss.WebServerExercisesStack | ss.RDSExerciseStack | ss.LambdaExercisesStack
+deploy_flags = ss.LambdaExercisesStack
 AppPipelineStack(app, "AppPipelineStack", deploy_flags, env={
     'account': '441875730569',
     'region': 'us-east-2'
