@@ -32,7 +32,8 @@ class StaticSiteExerciseStack(core.Stack):
         )
         s3deploy.BucketDeployment(self, 'DeployStaticSiteFiles',
                                   destination_bucket=static_site_bucket,
-                                  sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')])
+                                  sources=[s3deploy.Source.asset('./study_guide_exercises/site_files')],
+                                  storage_class=s3deploy.StorageClass.ONEZONE_IA)
         core.CfnOutput(self, 'new-static-site-bucket-url', value=static_site_bucket.bucket_website_url)
         core.CfnOutput(self, 'new-static-site-bucket', value=static_site_bucket.bucket_name)
         self.url = static_site_bucket.bucket_website_url

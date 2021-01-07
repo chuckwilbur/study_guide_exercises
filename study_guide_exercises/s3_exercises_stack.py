@@ -16,7 +16,8 @@ class S3ExercisesStack(core.Stack):
                            auto_delete_objects=True)
         s3deploy.BucketDeployment(self, 'DeployFiles',
                                   destination_bucket=bucket,
-                                  sources=[s3deploy.Source.asset('./study_guide_exercises/polly_file')])
+                                  sources=[s3deploy.Source.asset('./study_guide_exercises/polly_file')],
+                                  storage_class=s3deploy.StorageClass.ONEZONE_IA)
 
         core.CfnOutput(self, 'new-bucket', value=bucket.bucket_name)
 
