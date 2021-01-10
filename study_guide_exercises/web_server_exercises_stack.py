@@ -3,6 +3,8 @@ from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
 
+from ami_map import ami_map
+
 
 class WebServerExercisesStack(core.Stack):
 
@@ -66,10 +68,6 @@ class WebServerExercisesStack(core.Stack):
         )
 
         # the public ec2 instance
-        ami_map = {
-            'us-east-1': 'ami-04d29b6f966df1537',
-            'us-east-2': 'ami-09558250a3419e7d0'
-        }
         instance = ec2.Instance(self, 'webserver-ec2',
                                 instance_name='webserver',
                                 instance_type=ec2.InstanceType('t2.micro'),
