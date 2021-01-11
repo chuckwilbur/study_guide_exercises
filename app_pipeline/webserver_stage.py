@@ -10,6 +10,7 @@ from auth_exercises_stack import AuthExercisesStack
 from microservice_exercises_stack import MicroserviceExercisesStack
 from lambda_exercises_stack import LambdaExercisesStack
 from stateless_app_exercise_stack import StatelessAppExerciseStack
+from monitoring_exercises_stack import MonitoringExercisesStack
 
 
 class StackSwitches:
@@ -24,6 +25,7 @@ class StackSwitches:
     MicroserviceExercisesStack = 1 << 7
     LambdaExercisesStack = 1 << 8
     StatelessAppExerciseStack = 1 << 9
+    MonitoringExercisesStack = 1 << 10
 
 
 class WebServerStage(core.Stage):
@@ -67,3 +69,6 @@ class WebServerStage(core.Stage):
 
         if deploy_flags & StackSwitches.StatelessAppExerciseStack == StackSwitches.StatelessAppExerciseStack:
             StatelessAppExerciseStack(self, 'StatelessApp', **kwargs)
+
+        if deploy_flags & StackSwitches.MonitoringExercisesStack == StackSwitches.MonitoringExercisesStack:
+            MonitoringExercisesStack(self, 'Monitoring', **kwargs)
