@@ -3,7 +3,8 @@ from aws_cdk import core
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_iam as iam
 
-from ami_map import ami_map
+from helpers.ami_map import ami_map
+from helpers import instance_types as type
 
 
 class WebServerExercisesStack(core.Stack):
@@ -15,7 +16,7 @@ class WebServerExercisesStack(core.Stack):
         vpc = ec2.Vpc(self, 'devassoc',
                       max_azs=1,
                       nat_gateway_provider=ec2.NatProvider.instance(
-                          instance_type=ec2.InstanceType('t2.nano'),
+                          instance_type=type.T2_NANO,
                           key_name='devassoc'
                       ))
         core.Tags.of(vpc).add('Name', 'devassoc')
@@ -70,7 +71,7 @@ class WebServerExercisesStack(core.Stack):
         # the public ec2 instance
         instance = ec2.Instance(self, 'webserver-ec2',
                                 instance_name='webserver',
-                                instance_type=ec2.InstanceType('t2.micro'),
+                                instance_type=type.T2_MICRO,
                                 machine_image=ec2.MachineImage.generic_linux(
                                     ami_map=ami_map
                                 ),
@@ -102,7 +103,7 @@ class WebServerExercisesStack(core.Stack):
         # the private ec2 instance
         instance = ec2.Instance(self, 'private-ec2',
                                 instance_name='private-instance',
-                                instance_type=ec2.InstanceType('t2.micro'),
+                                instance_type=type.T2_MICRO,
                                 machine_image=ec2.MachineImage.generic_linux(
                                     ami_map=ami_map
                                 ),

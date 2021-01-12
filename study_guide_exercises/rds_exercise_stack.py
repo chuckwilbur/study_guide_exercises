@@ -6,6 +6,8 @@ from aws_cdk import aws_s3_deployment as s3deploy
 from aws_cdk import aws_rds as rds
 from aws_cdk import aws_secretsmanager as secretsmanager
 
+from helpers import instance_types as type
+
 
 class RDSExerciseStack(core.Stack):
 
@@ -30,7 +32,7 @@ class RDSExerciseStack(core.Stack):
         rds_maria_db = rds.DatabaseInstance(self, 'devassoc-rds',
                                             instance_identifier='my-rds-db',
                                             database_name='mytestdb',
-                                            instance_type=ec2.InstanceType('t2.micro'),
+                                            instance_type=type.T2_MICRO,
                                             engine=rds.DatabaseInstanceEngine.maria_db(version=db_version),
                                             credentials=rds.Credentials.from_secret(rds_creds_secret),
                                             security_groups=[db_security_group],

@@ -7,7 +7,8 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_s3_deployment as s3deploy
 from aws_cdk import aws_backup as backup
 
-from ami_map import ami_map
+from helpers.ami_map import ami_map
+from helpers import instance_types as type
 
 
 class StatelessAppExerciseStack(core.Stack):
@@ -39,7 +40,7 @@ class StatelessAppExerciseStack(core.Stack):
 
         ec2.Instance(self, 'ec2-efs-instance',
                      instance_name='efs-instance',
-                     instance_type=ec2.InstanceType('t2.micro'),
+                     instance_type=type.T2_MICRO,
                      machine_image=ec2.MachineImage.generic_linux(
                          ami_map=ami_map
                      ),
