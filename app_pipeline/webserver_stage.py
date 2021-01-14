@@ -11,6 +11,7 @@ from microservice_exercises_stack import MicroserviceExercisesStack
 from lambda_exercises_stack import LambdaExercisesStack
 from stateless_app_exercise_stack import StatelessAppExerciseStack
 from monitoring_exercises_stack import MonitoringExercisesStack
+from optimization_exercises_stack import OptimizationExercisesStack
 
 
 class StackSwitches:
@@ -26,6 +27,7 @@ class StackSwitches:
     LambdaExercisesStack = 1 << 8
     StatelessAppExerciseStack = 1 << 9
     MonitoringExercisesStack = 1 << 10
+    OptimizationExercisesStack = 1 << 11
 
 
 class WebServerStage(core.Stage):
@@ -72,3 +74,6 @@ class WebServerStage(core.Stage):
 
         if deploy_flags & StackSwitches.MonitoringExercisesStack == StackSwitches.MonitoringExercisesStack:
             MonitoringExercisesStack(self, 'Monitoring', **kwargs)
+
+        if deploy_flags & StackSwitches.OptimizationExercisesStack == StackSwitches.OptimizationExercisesStack:
+            OptimizationExercisesStack(self, 'Optimization', **kwargs)
