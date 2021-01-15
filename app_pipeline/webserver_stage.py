@@ -35,6 +35,10 @@ class WebServerStage(core.Stage):
     def __init__(self, scope: core.Construct, construct_id: str, deploy_flags: int, **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
+        if deploy_flags == StackSwitches.NoStack:
+            core.Stack(self, 'EmptyStack')
+            return
+
         if deploy_flags & StackSwitches.WebServerExercisesStack == StackSwitches.WebServerExercisesStack:
             service = WebServerExercisesStack(self, 'WebServer', **kwargs)
 
